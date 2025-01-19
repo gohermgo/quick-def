@@ -5,7 +5,7 @@
 //! ```
 //! use quick_deref::*;
 //! #[quick_deref]
-//! pub struct SomeNewType(u8)
+//! pub struct SomeNewType(u8);
 //! assert_eq!(
 //!        core::any::TypeId::of::<u8>(),
 //!        core::any::TypeId::of::<<SomeNewType as core::ops::Deref>::Target>()
@@ -21,7 +21,7 @@
 //! }
 //! assert_eq!(
 //!     core::any::TypeId::of::<u128>(),
-//!     core::any::TypeIf::of::<<ComplicatedObject as core::ops::Deref>::Target>()
+//!     core::any::TypeId::of::<<ComplicatedObject as core::ops::Deref>::Target>()
 //! );
 //! ```
 

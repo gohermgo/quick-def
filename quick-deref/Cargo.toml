@@ -1,7 +1,24 @@
 [package]
 name = "quick-deref"
-version = "0.1.0"
 edition = "2024"
+version = "0.1.0"
+authors = ["gohermgo"]
+
+[lib]
+path = "src/lib.rs"
 
 [dependencies]
 quick-deref-macro = { workspace = true }
+
+[workspace]
+members = ["quick-deref-core", "quick-deref-macro" ]
+resolver = "3"
+package = { version = "0.1.0", edition = "2024", authors = [ "gohermgo" ] }
+
+[workspace.dependencies]
+darling = "0.20.10"
+proc-macro2 = "1.0.91"
+quote = "1.0.38"
+syn = { version = "2.0.96", features = ["full"] }
+quick-deref-core = { path = "quick-deref-core", version = "*" }
+quick-deref-macro = { path = "quick-deref-macro", version = "*" }
