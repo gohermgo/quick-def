@@ -1,6 +1,7 @@
 [workspace]
 members = ["quick-deref-core", "quick-deref-macro", "quick-deref"]
 resolver = "3"
+package.authors = [ "gohermgo" ]
 
 [workspace.dependencies]
 darling = "0.20.10"
