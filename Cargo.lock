@@ -59,18 +59,29 @@ dependencies = [
 ]
 
 [[package]]
-name = "quick-def"
+name = "quick-deref"
 version = "0.1.0"
 dependencies = [
- "quick-def-macro",
+ "quick-deref-macro",
 ]
 
 [[package]]
-name = "quick-def-macro"
+name = "quick-deref-core"
 version = "0.1.0"
 dependencies = [
  "darling",
  "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "quick-deref-macro"
+version = "0.1.0"
+dependencies = [
+ "darling",
+ "proc-macro2",
+ "quick-deref-core",
  "quote",
  "syn",
 ]

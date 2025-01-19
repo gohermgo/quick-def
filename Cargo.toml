@@ -1,7 +1,9 @@
-[package]
-name = "quick-def"
-version = "0.1.0"
-edition = "2024"
+[workspace]
+members = ["quick-deref-core", "quick-deref-macro", "quick-deref"]
+resolver = "3"
 
-[dependencies]
-quick-def-macro = { path = "quick-def-macro" }
+[workspace.dependencies]
+darling = "0.20.10"
+proc-macro2 = "1.0.91"
+quote = "1.0.38"
+syn = { version = "2.0.96", features = ["full"] }

@@ -1,0 +1,7 @@
+[package]
+name = "quick-deref"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+quick-deref-macro = { path = "../quick-deref-macro" }
