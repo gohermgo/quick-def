@@ -20,7 +20,7 @@ pub struct QuickDefaultAttribute {
     pub style: syn::AttrStyle,
     pub bracket_token: syn::token::Bracket,
     pub meta: syn::Meta,
-    pub value: syn::Lit,
+    pub attr_expr: syn::Lit,
 }
 impl TryFrom<syn::Attribute> for QuickDefaultAttribute {
     type Error = syn::Error;
@@ -44,9 +44,127 @@ impl TryFrom<syn::Attribute> for QuickDefaultAttribute {
             style,
             bracket_token,
             meta,
-            value: list.parse_args()?,
+            attr_expr: list.parse_args()?,
         })
     }
+}
+#[derive(Clone)]
+pub struct QuickDefaultExpression(pub syn::Expr);
+impl Default for QuickDefaultExpression {
+    fn default() -> Self {
+        QuickDefaultExpression(syn::parse_quote!(::std::default::Default::default()))
+    }
+}
+impl Parse for QuickDefaultExpression {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        input.parse().map(QuickDefaultExpression)
+    }
+}
+pub struct QuickDefaultField2 {
+    pub field: syn::Field,
+    pub def_expr: Option<QuickDefaultExpression>,
+}
+fn try_extract_field_default_attribute(
+    ref in_field @ syn::Field {
+        attrs: ref in_attrs,
+        ..
+    }: syn::Field,
+) -> syn::Result<(syn::Field, Option<QuickDefaultExpression>)> {
+    let mut def_attr = None;
+    // Early-return, default is implied
+    if in_attrs.is_empty() {
+        return Ok((in_field.clone(), def_attr));
+    }
+    let mut out_attrs = vec![];
+    for attr @ syn::Attribute {
+        meta,
+        pound_token,
+        style,
+        bracket_token,
+    } in in_attrs
+    {
+        // If we cannot get a meta-list, skip this attribute
+        let Ok(list) = meta.require_list() else {
+            out_attrs.push(attr.clone());
+            continue;
+        };
+        // If we cannot get an ident to match, skip this attribute
+        let Ok(attr_ident) = list.path.require_ident() else {
+            out_attrs.push(attr.clone());
+            continue;
+        };
+        // Not the attribute we are looking for
+        if attr_ident != "default" {
+            out_attrs.push(attr.clone());
+            continue;
+        }
+
+        // Here we propagate errors, malformed input is our responsibility
+        let parse_res = list.parse_args()?;
+        def_attr = Some(parse_res);
+    }
+    let out_field = syn::Field {
+        attrs: out_attrs,
+        ..in_field.clone()
+    };
+    Ok((out_field, def_attr))
+}
+pub struct QuickDefaultFieldsUnnamed2 {
+    pub paren_token: syn::token::Paren,
+    pub unnamed: syn::punctuated::Punctuated<QuickDefaultField2, syn::Token![,]>,
+}
+fn try_convert_fields_unnamed(
+    syn::FieldsUnnamed {
+        paren_token,
+        unnamed,
+    }: syn::FieldsUnnamed,
+) -> syn::Result<QuickDefaultFieldsUnnamed2> {
+    todo!()
+}
+fn unnamed_default_fields_to_default_body(
+    QuickDefaultFieldsUnnamed2 {
+        paren_token,
+        unnamed,
+    }: QuickDefaultFieldsUnnamed2,
+) -> syn::punctuated::Punctuated<syn::FieldValue, syn::Token![,]> {
+    let mut buf = syn::punctuated::Punctuated::new();
+    for (index, pair) in unnamed.into_pairs().enumerate() {
+        let value = pair.value();
+        let member = syn::Member::from(index);
+        let QuickDefaultExpression(expr) = value.def_expr.clone().unwrap_or_default();
+        let field_value = syn::FieldValue {
+            attrs: value.field.attrs.clone(),
+            member,
+            colon_token: value.field.colon_token,
+            expr,
+        };
+        buf.push(field_value);
+    }
+    buf
+}
+pub struct QuickDefaultFieldsNamed2 {
+    pub brace_token: syn::token::Brace,
+    pub named: syn::punctuated::Punctuated<QuickDefaultField2, syn::Token![,]>,
+}
+fn named_default_fields_to_default_body(
+    QuickDefaultFieldsNamed2 { brace_token, named }: QuickDefaultFieldsNamed2,
+) -> syn::punctuated::Punctuated<syn::FieldValue, syn::Token![,]> {
+    let mut buf = syn::punctuated::Punctuated::new();
+    for (index, pair) in named.into_pairs().enumerate() {
+        let value = pair.value();
+        let ident = value.field.ident.clone().expect("Named field");
+        let member = syn::Member::Named(ident);
+
+        let QuickDefaultExpression(expr) = value.def_expr.clone().unwrap_or_default();
+        let field_value = syn::FieldValue {
+            attrs: value.field.attrs.clone(),
+            member,
+            colon_token: value.field.colon_token,
+            expr,
+        };
+        buf.push(field_value);
+    }
+    buf
 }
 #[derive(Clone)]
 pub struct QuickDefaultField {
@@ -120,7 +238,10 @@ impl ToTokens for QuickDefaultField {
             ..
         } = self;
         tokens.extend(quote! { #ident #colon_token });
-        if let Some(QuickDefaultAttribute { value, .. }) = default_value_attr {
+        if let Some(QuickDefaultAttribute {
+            attr_expr: value, ..
+        }) = default_value_attr
+        {
             tokens.extend(quote! { #value });
         } else {
             tokens.extend(quote! { ::std::default::Default::default() });

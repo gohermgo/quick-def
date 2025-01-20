@@ -7,15 +7,15 @@ authors = ["gohermgo"]
 [dependencies]
 quick-default-macro = { workspace = true }
 
-[workspace]
-members = ["quick-default-core", "quick-default-macro" ]
-resolver = "3"
-package = {edition = "2024", version = "0.1.0", authors = [ "gohermgo" ]}
+# [workspace]
+# members = ["quick-default-core", "quick-default-macro" ]
+# resolver = "3"
+# package = {edition = "2024", version = "0.1.0", authors = [ "gohermgo" ]}
 
-[workspace.dependencies]
-darling = "0.20.10"
-proc-macro2 = "1.0.91"
-quote = "1.0.38"
-syn = { version = "2.0.96", features = ["full"] }
-quick-default-core = { path = "quick-default-core", version = "*" }
-quick-default-macro = { path = "quick-default-macro", version = "*" }
+# [workspace.dependencies]
+# darling = "0.20.10"
+# proc-macro2 = "1.0.91"
+# quote = "1.0.38"
+# syn = { version = "2.0.96", features = ["full"] }
+# quick-default-core = { path = "quick-default-core", version = "*" }
+# quick-default-macro = { path = "quick-default-macro", version = "*" }

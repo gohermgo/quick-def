@@ -1,10 +1,16 @@
-//! quick-default
+//! # quick-default
 //!
 //! The goto-crate for your quick-default-needs
+//! This crate aims to provide developers with an ergonomic
+//! alternative to writing a default implementation.
 //!
 //! Simply mark a struct quick_default,
 //! provide a default value using the #[default(..)] (or omit for implicit default)
 //! and voi la.
+//!
+//! # Examples
+//!
+//! A simple default for any struct can be added (without the need for an implementation block)
 //!
 //! ```
 //! use quick_default::*;
